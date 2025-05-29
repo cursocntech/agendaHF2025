@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agendamento de Chromebooks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-center">Agendamento de Gabinetes de Chromebooks</h1>
+
+    <label for="date" class="block font-semibold mb-1">Selecione a Data:</label>
+    <input type="date" id="date" class="mb-4 p-2 w-full rounded border" />
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Turno da Manhã</h2>
+        <div id="morning" class="space-y-2"></div>
+      </div>
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Turno da Tarde</h2>
+        <div id="afternoon" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+ <script>
+    const cabinets = ["Gabinete 1", "Gabinete 2", "Gabinete 3", "Gabinete 4", "Gabinete 5"];
+
+    const morningDiv = document.getElementById("morning");
+    const afternoonDiv = document.getElementById("afternoon");
+    const dateInput = document.getElementById("date");
+
+    dateInput.valueAsDate = new Date();
+
+    function renderSlots(date) {
+      morningDiv.innerHTML = "";
+      afternoonDiv.innerHTML = "";
+
+      cabinets.forEach((cabinet) => {
+        createSlot(morningDiv, date, cabinet, "morning");
+        createSlot(afternoonDiv, date, cabinet, "afternoon");
+      });
+    }
+
+    function createSlot(container, date, cabinet, shift) {
+      const key = `${date}-${shift}-${cabinet}`;
+      const reserved = localStorage.getItem(key);
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-2 flex-wrap";
+
+      const label = document.createElement("span");
+      label.textContent = `${cabinet}: `;
+
+      div.appendChild(label);
+
+      if (reserved) {
+        const reservedBy = document.createElement("span");
+        reservedBy.textContent = `Reservado por: ${reserved}`;
+        reservedBy.className = "text-red-600 font-semibold";
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.textContent = "Cancelar";
+        cancelBtn.className = "bg-red-500 text-white px-3 py-1 rounded ml-2";
+
+        cancelBtn.onclick = () => {
+          localStorage.removeItem(key);
+          renderSlots(date);
+        };
+
+        div.appendChild(reservedBy);
+        div.appendChild(cancelBtn);
+      } else {
+        const input = document.createElement("input");
+        input.placeholder = "Nome do Professor";
+        input.className = "p-1 border rounded w-full";
+
+        const btn = document.createElement("button");
+        btn.textContent = "Reservar";
+        btn.className = "bg-blue-500 text-white px-3 py-1 rounded";
+
+        btn.onclick = () => {
+          if (input.value.trim()) {
+            localStorage.setItem(key, input.value.trim());
+            renderSlots(date);
+          }
+        };
+
+        div.appendChild(input);
+        div.appendChild(btn);
+      }
+
+      container.appendChild(div);
+    }
+
+    dateInput.addEventListener("change", () => renderSlots(dateInput.value));
+
+    renderSlots(dateInput.value);
+  </script>
+</body>
+</html>
+
+
+
